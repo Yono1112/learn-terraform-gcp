@@ -56,3 +56,33 @@ resource "google_compute_firewall" "allow_ssh" {
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["wordpress-web"]
 }
+
+resource "google_compute_instance" "wordpress_vm" {
+  name         = "wordpress-instance"
+  machine_type = "e2-micro"
+  zone         = "${var.region}-a"
+
+  // ファイアウォールルールを適用するためのタグ
+  tags = ["wordpress-web"]
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.public_subnet.id
+    // access_config {} を記述することで、パブリックIPアドレスが割り当てられる
+    access_config {}
+  }
+
+  // 起動時に実行するスクリプトを指定
+  metadata_startup_script = file("startup-script.sh")
+
+  // データベースが作成される前に、このインスタンスが削除されないようにする
+  // (後のステップでデータベースとの依存関係を定義します)
+  lifecycle {
+    prevent_destroy = true
+  }
+}
