@@ -8,30 +8,19 @@ terraform {
 }
 
 provider "google" {
-  project = var.project
-  region = var.region
-  zone = var.zone
+  project = var.project_id
+  region  = var.region
 }
 
 resource "google_compute_network" "vpc_network" {
-  name = "terraform-network"
-  auto_create_subnetworks = true
+  name                    = "wordpress-vpc"
+  auto_create_subnetworks = false
+  mtu                     = 1460
 }
 
-resource "google_compute_instance" "vm_instance" {
-  name         = "terraform-instance"
-  machine_type = "f1-micro"
-  tags = [ "web", "dev" ]
-
-  boot_disk {
-    initialize_params {
-      image = "cos-cloud/cos-stable"
-    }
-  }
-
-  network_interface {
-    network = google_compute_network.vpc_network.name
-    access_config {
-    }
-  }
+resource "google_compute_subnetwork" "public_subnet" {
+  name          = "wordpress-public-subnet"
+  ip_cidr_range = "10.0.1.0/24"
+  region        = var.region
+  network       = google_compute_network.vpc_network.id
 }

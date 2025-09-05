@@ -1,9 +1,11 @@
-variable "project" { }
-
-variable "region" {
-  default = "us-central1"
+variable "project_id" {
+  description = "Your GCP Project ID"
+  type        = string
+  default     = "keishou-app"
 }
 
-variable "zone" {
-  default = "us-central1-c"
+variable "region" {
+  description = "The region to host the resources"
+  type        = string
+  default     = "asia-northeast1"
 }
